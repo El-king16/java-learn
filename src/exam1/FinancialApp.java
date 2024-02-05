@@ -1,58 +1,99 @@
 package exam1;
+import java.math.BigDecimal;
 import java.util.Scanner;
+
 public class FinancialApp {
+    private static final BigDecimal[] expenses = new BigDecimal[31];
+    private static final Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        int[] expenses = new int[30];
-        while (true) {
+        int choice;
+        do {
             System.out.println("Меню:");
             System.out.println("1 – Ввести расходы за определенный день");
             System.out.println("2 – Траты за месяц");
             System.out.println("3 – Самая большая сумма расхода за месяц");
+            System.out.println("4 – Конвертер валюты");
             System.out.println("0 – Выход");
             System.out.print("Выберите пункт меню: ");
-            int num_menu = scanner.nextInt();
+            choice = scanner.nextInt();
 
-            if (num_menu == 1) {
-                System.out.print("Введите день (от 1 до 30): ");
-                int day = scanner.nextInt();
-                System.out.print("Введите сумму трат: ");
-                int amount = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    enterExpenses();
+                    break;
+                case 2:
+                    ExpensesMoth();
+                    break;
+                case 3:
+                    MaxExpense();
+                    break;
+                case 4:
+                    Converter();
+                    break;
+                case 0:
+                    System.out.println("Прощайте!");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Неверный выбор. Попробуйте снова.");
+            }
+        } while (choice != 0);
+    }
 
-                if (expenses[day - 1] != 0) {
-                    System.out.print("За этот день уже указаны траты, перезаписать? (да/нет): ");
-                    String rewrite = scanner.next();
+    private static void enterExpenses() {
+        System.out.print("Введите номер дня (от 1 до 30): ");
+        int day = scanner.nextInt();
+        System.out.print("Введите сумму трат: ");
+        BigDecimal amount = scanner.nextBigDecimal();
 
-                    if (rewrite.equalsIgnoreCase("да")) {
-                        expenses[day - 1] = amount;
-                    }
-                } else {
-                    expenses[day - 1] = amount;
-                }
-            } else if (num_menu == 2) {
-                System.out.println("Траты за месяц:");
-                for (int i = 0; i < expenses.length; i++) {
-                    if (expenses[i] != 0) {
-                        System.out.println((i + 1) + " день – " + expenses[i] + " руб");
-                    }
-                }
-            } else if (num_menu == 3) {
-                int maxExpense = 0;
-                int maxDay = 0;
-                for (int i = 0; i < expenses.length; i++) {
-                    if (expenses[i] > maxExpense) {
-                        maxExpense = expenses[i];
-                        maxDay = i + 1;
-                    }
-                }
-                System.out.println("Самая большая сумма расхода за месяц: " + maxDay + " день – " + maxExpense + " руб");
-            } else if (num_menu == 0) {
-                System.out.println("До свидания!");
-                System.exit(0);
-            } else {
-                System.out.println("Неверный выбор, попробуйте снова");
+        if (expenses[day] != null) {
+            System.out.print("На этот день уже есть запись. Перезаписать? (1 – да, 0 – нет): ");
+            int overwriteChoice = scanner.nextInt();
+            if (overwriteChoice == 1) {
+                expenses[day] = amount;
+            }
+        } else {
+            expenses[day] = amount;
+        }
+    }
+
+    private static void ExpensesMoth() {
+        System.out.println("Траты за месяц:");
+        for (int i = 1; i < expenses.length; i++) {
+            if (expenses[i] != null) {
+                System.out.println(i + " день – " + expenses[i] + " руб");
             }
         }
     }
-}
 
+    private static void MaxExpense() {
+        int maxDay = -1;
+        BigDecimal maxExpense = BigDecimal.ZERO;
+
+        for (int i = 1; i < expenses.length; i++) {
+            if (expenses[i] != null && expenses[i].compareTo(maxExpense) > 0) {
+                maxDay = i;
+                maxExpense = expenses[i];
+            }
+        }
+
+        System.out.println("Самая большая сумма расхода за месяц:");
+        System.out.println(maxDay + " день – " + maxExpense + " руб");
+    }
+
+    private static void Converter() {
+        BigDecimal totalExpenses = BigDecimal.ZERO;
+        for (int i = 1; i < expenses.length; i++) {
+            if (expenses[i] != null) {
+                totalExpenses = totalExpenses.add(expenses[i]);
+            }
+        }
+
+        System.out.println("Конвертер валюты:");
+        System.out.println("Все затраты за месяц:");
+        System.out.println("В евро: " + totalExpenses.multiply(new BigDecimal("0.012")) + " EUR");
+        System.out.println("В доллары: " + totalExpenses.multiply(new BigDecimal("0.014")) + " USD");
+        System.out.println("В юани: " + totalExpenses.multiply(new BigDecimal("0.089")) + " CNY");
+    }
+}
